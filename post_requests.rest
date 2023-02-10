@@ -1,0 +1,17 @@
+POST http://localhost:3001/api/notes
+Content-Type: application/json
+
+{
+    "content" : "Teri Meri Prem Kahani Hai Mushkil",
+    "artist" : "Rahat Fateh Ali khan"
+}
+###
+DELETE http://localhost://localhost:3001/api/notes/4
+###
+POST http://localhost:3001/kyabaat
+Content-Type: application/json
+
+{
+    "content" : "Hey there",
+    "title" : "Htfayd"
+}
