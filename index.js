@@ -1,11 +1,14 @@
+require('dotenv').config()
 const express = require("express");
 const cors = require("cors");
+const mongoose = require("mongoose");
+const Note = require("./models/notes")
 
 const app = express()
 
 app.use(express.json())
 app.use(cors())
-app.use(express.static('build'))
+//app.use(express.static('build'))
 
 let notes = [
   {
@@ -37,7 +40,10 @@ app.get("/test",(req,res) => {
 })
 
 app.get("/api/notes", (req,res) => {
-  res.json(notes)
+  Note.find({}).then(result => {
+    console.log("Im here")
+    res.json(result)
+  })
 })
 
 app.get("/api/notes/:uid",(req,res) => {
@@ -88,7 +94,7 @@ app.delete("/api/notes/:uid",(req,res) => {
   res.status(204).send("<h3>The requested post has been deleted")
 })
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3010;
 
 app.listen(PORT,() => {
   console.log(`Server running live now on localhost:${PORT}`)
