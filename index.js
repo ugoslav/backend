@@ -1,37 +1,15 @@
 require('dotenv').config()
 const express = require("express");
 const cors = require("cors");
-const mongoose = require("mongoose");
 const Note = require("./models/notes")
 
 const app = express()
 
 app.use(express.json())
+app.use(express.static('build'))
 app.use(cors())
-//app.use(express.static('build'))
 
-let notes = [
-  {
-    id: 1,
-    content: "HTML is easy",
-    date: "2022-05-30T17:30:31.098Z",
-    important: true
-  },
-  {
-    id: 2,
-    content: "Browser can execute only CSS",
-    date: "2022-05-30T18:39:34.091Z",
-    important: false
-  },
-  {
-    id: 3,
-    content: "GET and POST are the most important methods of HTTP protocol",
-    date: "2022-05-30T19:20:14.298Z",
-    important: true
-  }
-]
-
-app.get("/",(req,res) => {
+app.get("/greetings",(req,res) => {
   res.end("Hello world!!yo")
 })
 
@@ -41,18 +19,33 @@ app.get("/test",(req,res) => {
 
 app.get("/api/notes", (req,res) => {
   Note.find({}).then(result => {
-    console.log("Im here")
     res.json(result)
   })
 })
 
-app.get("/api/notes/:uid",(req,res) => {
-  const id = parseInt(req.params.uid,10)
-  const note = notes.find(note => note.id === id)
-  if(note)
-    res.json(note)
-  else
-    res.status(404).send("<h3>OOPS!!Page Not Found.</h3>")
+const errHandler = (error , req , res , next) => {
+  console.log(error.message)
+  
+  if(error.name === 'CastError') {
+    return res.status(400).send({ err : 'malformatted id'})
+  }
+  
+  next(err)
+}
+
+app.use(errHandler)
+
+app.get("/api/notes/:uid",(req,res,next) => {
+  Note.findById(req.params.uid)
+  .then(sketch => {
+    if(sketch){
+      res.json(sketch)
+    }
+    else{
+      res.status(404).send("<h2>Sorry,not available</h2>")
+    }
+  })
+  .catch(err => next(err))
 })
 
 app.post('/kyabaat', (req,res) => {
@@ -61,41 +54,53 @@ app.post('/kyabaat', (req,res) => {
 })
 
 app.post('/api/notes',(req,res) => {
-
-  const generateId = () => {
-    const maxId = notes.length > 0
-    ? Math.max(...notes.map(n => n.id))
-    : 0
-    return maxId + 1;
-  }
   
   const body = req.body
-
-  if(!body.content)
-    return res.status(400).send("<h2>Error : Content Missing</h2>")
-
-  const noteToBeAdded = {
-    body : body.content,
-    important : body.important || false,
-    date : new Date(),
-    id : generateId()
+  
+  if(body.content === undefined){
+    return res.status(400).send("<h2>Sorry,no content,no post...")
   }
-
-  console.log(noteToBeAdded)
-  notes = notes.concat(noteToBeAdded)
-  res.json(notes)
-  //console.log(req.header["content-type"])
+  
+  const note = new Note({
+    content : body.content,
+    important : body.important,
+    date : new Date(),
+  })
+  
+  note.save().then(savedNote =>
+    res.json(savedNote)
+    )
 })
 
-
-app.delete("/api/notes/:uid",(req,res) => {
-  const id = Number(req.params.uid);
-  notes = notes.filter(note => note.id !== id);
-  res.status(204).send("<h3>The requested post has been deleted")
+app.put("/api/notes/:uid" , (req, res , next) => {
+  const body = req.body
+  
+  const sketch = {
+    content : body.content,
+    date : new Date(),
+    important : body.important,
+  }
+  
+  Note.findByIdAndUpdate(req.params.uid , sketch , {new : true})
+  .then(updatedSketch => {
+    res.json(updatedSketch)
+  })
+  .catch(err => next(err))
 })
+  
+  
+app.delete("/api/notes/:uid",(req,res,next) => {
+  Note.findByIdAndRemove(req.params.uid)
+  .then(result => {
+    res.status(204).end("Deleted successfully")
+  })
+  .catch(err => next(err))
+})
+  
 
+  
 const PORT = process.env.PORT || 3010;
-
+  
 app.listen(PORT,() => {
   console.log(`Server running live now on localhost:${PORT}`)
 })
