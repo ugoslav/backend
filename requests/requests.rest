@@ -1,0 +1,27 @@
+POST http://localhost:3001/api/notes
+Content-Type: application/json
+
+{
+    "content" : "Jordanh Peterson is good...?",
+    "important" : true
+}
+###
+DELETE http://localhost:3001/api/notes/63f78c3eda072e14c80982de
+###
+POST http://localhost:3001/sample
+Content-Type: application/json
+
+{
+    "content" : "Hey there",
+    "title" : "Htfayd"
+}
+
+###
+
+PUT http://localhost:3001/api/notes/63f78d1d00f939a9ed1dcda5
+Content-Type: application/json
+
+{
+    "content" : "Jordi El Nino Polla is a good boy",
+    "important" : true
+}
