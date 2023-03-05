@@ -1,15 +1,19 @@
 const notesRouter = require('express').Router()
 const Note = require("../models/note")
 
-notesRouter.get("/" , (req,res) => {
-    Note.find({})
-        .then(notes => {
-            res.json(notes)
-        })
+notesRouter.get("/" , async (req,res) => {
+    const notes = await Note.find({})
+    res.json(notes)
 })
 
-notesRouter.get("/:id", (req,res,next) => {
-    Note.findById(req.params.id)
+notesRouter.get("/:id", async (req, res) => {
+    const note = await Note.findById(req.params.id)
+    if(note){
+        res.json(note)
+    } else{
+        res.status(404).end()
+    }
+    /*Note.findById(req.params.id)
         .then(note => {
             if(note){
                 res.json(note)
@@ -20,26 +24,30 @@ notesRouter.get("/:id", (req,res,next) => {
         })
         .catch(err => {
             next(err)
-        })
+        })*/
 })
 
-notesRouter.post("/" , (req , res , next) => {
+notesRouter.post("/" , async (req , res) => {
     const body = req.body
 
     const note = new Note({
         content : body.content,
-        important : body.important,
+        important : body.important || false,
         date : new Date(),
     })
-
-    note.save()
+    
+    const savedNote = await note.save()
+    res.status(201).json(savedNote)
+    
+    /*note.save()                           //Synchronous alternative
         .then(savedNote => {
-            res.json(savedNote)
+            res.status(201).json(savedNote)
         })
-        .catch(err => next(err))
+        .catch(err => next(err))*/
 })
 
-notesRouter.put("/:id" , (req,res,next) => {
+notesRouter.put("/:id" , async (req,res,next) => {
+
     const body = req.body
 
     const note = {
@@ -55,12 +63,16 @@ notesRouter.put("/:id" , (req,res,next) => {
         .catch(err => next(err))
 })
 
-notesRouter.delete("/:id" , (req,res,next) => {
-    Note.findByIdAndRemove(req.params.id)
+notesRouter.delete("/:id" , async (req,res) => {
+
+    await Note.findByIdAndRemove(req.params.id)
+    res.status(204).end()
+
+    /*Note.findByIdAndRemove(req.params.id)         //Synchronous alternative
         .then(() => {
             res.status(204).send("<h2>The note has been removed</h2>")
         })
-        .catch(err => next(err))
+        .catch(err => next(err))*/
 })
 
 module.exports = notesRouter

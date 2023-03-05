@@ -16,7 +16,7 @@ mongoose.connect(url)
 const noteSchema = new mongoose.Schema({
   content: String,
   date : Date,
-  important: Boolean,
+  important: Boolean
 })
 
 const Note = mongoose.model('SKETCH', noteSchema)
@@ -44,17 +44,40 @@ note.save().then(result => {
   mongoose.connection.close()
 })
   
-noteOne.save().then(result => {
+/*noteOne.save().then(result => {
   console.log('Second note saved!!')
-})
+})*/
   
 noteSecond.save().then(result => {
   console.log("First note saved !")
 })
 
-/*Note.find({}).then(result => {
-  result.forEach(note => {
-    console.log(note)
-  })
-  mongoose.connection.close()
+/*Note.find({})
+    .then(result => {   
+    result.forEach(note => {
+      console.log(note)
+    })
+    mongoose.connection.close()
+    .then(() => {
+      console.log("First sentence was printed")
+    })
+    .then(() => {
+      console.log("Second sentence was printed")
+    })
 })*/
+
+
+/*const main = async () => {
+
+  const notes = await Note.find({})
+
+  console.log("The first fetch gave us the following notes " , notes)
+  
+  const response = await notes[0].remove() 
+  
+  console.log("The first note is removed")
+
+  mongoose.connection.close()
+}
+
+main()*/
