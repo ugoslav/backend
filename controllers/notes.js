@@ -11,7 +11,7 @@ notesRouter.get("/:id", async (req, res) => {
     if(note){
         res.json(note)
     } else{
-        res.status(404).end()
+        res.status(404).end("Oops not found here")
     }
     /*Note.findById(req.params.id)
         .then(note => {
